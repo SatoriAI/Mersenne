@@ -2,6 +2,7 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from mersenne.app import create_app
 from mersenne.settings import Settings
 
 
@@ -47,22 +48,19 @@ def test_rejects_exponent_above_max(
         json={"p": test_settings.max_mersenne_exponent + 1},
     )
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # Operational limit -> 400 (distinct from schema-validation 422).
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_max_exponent_is_configurable() -> None:
     # The ceiling is an operational setting, so a lower configured value must
     # reject an exponent that would otherwise be accepted.
-    from mersenne.app import create_app
-    from mersenne.settings import get_settings
-
     low_max = Settings(app_name="Mersenne-Test", max_mersenne_exponent=5)
     app = create_app(low_max)
-    app.dependency_overrides[get_settings] = lambda: low_max
 
     response = TestClient(app).post("/mersenne/primality", json={"p": 7})
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_rejects_malformed_body(client: TestClient) -> None:

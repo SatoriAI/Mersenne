@@ -1,7 +1,12 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Request
 
-from mersenne.settings import Settings, get_settings
+from mersenne.settings import Settings
 
-SettingsDep = Annotated[Settings, Depends(get_settings)]
+
+def get_settings_from_state(request: Request) -> Settings:
+    return request.app.state.settings
+
+
+SettingsDep = Annotated[Settings, Depends(get_settings_from_state)]

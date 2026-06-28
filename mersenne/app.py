@@ -22,6 +22,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         debug=settings.debug,
         docs_url=settings.swagger_endpoint if settings.swagger_enabled else None,
     )
+    # Single source of truth for request-time settings (see SettingsDep). Set
+    # before routers/middleware so any later wiring can rely on it.
+    application.state.settings = settings
 
     # allow_credentials=True is incompatible with allow_origins=["*"]; list explicit origins in env.
     application.add_middleware(

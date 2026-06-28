@@ -53,9 +53,11 @@ def check_mersenne_primality(
     payload: MersennePrimalityRequest,
     settings: SettingsDep,
 ) -> MersennePrimalityResponse:
+    # Operational limit (not schema validation): use 400 so its plain-string
+    # detail is distinct from Pydantic's structured 422 validation errors.
     if payload.p > settings.max_mersenne_exponent:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"p must be <= {settings.max_mersenne_exponent}.",
         )
 

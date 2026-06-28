@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from mersenne.app import create_app
-from mersenne.settings import Settings, get_settings
+from mersenne.settings import Settings
 
 
 @pytest.fixture
@@ -16,11 +16,7 @@ def test_settings() -> Settings:
 
 @pytest.fixture
 def app(test_settings: Settings) -> FastAPI:
-    # Build the app from the test settings so construction-time config (docs,
-    # title, CORS) is hermetic, and override the request-time dependency too.
-    application = create_app(test_settings)
-    application.dependency_overrides[get_settings] = lambda: test_settings
-    return application
+    return create_app(test_settings)
 
 
 @pytest.fixture

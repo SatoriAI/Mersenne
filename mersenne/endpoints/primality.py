@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from mersenne.dependencies import SettingsDep
-from mersenne.services.lucas_lehmer import LucasLehmer
+from mersenne.services.lucas_lehmer import is_mersenne_prime
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +65,8 @@ def check_mersenne_primality(
 
     # Sync handler: the Lucas-Lehmer test is CPU-bound, so FastAPI runs it in a
     # threadpool instead of blocking the event loop.
-    lucas_lehmer = LucasLehmer(payload.p)
     return MersennePrimalityResponse(
         p=payload.p,
-        mersenne_number=str(lucas_lehmer.mersenne_number),
-        is_prime=lucas_lehmer.test(),
+        mersenne_number=str(2**payload.p - 1),
+        is_prime=is_mersenne_prime(payload.p),
     )
